@@ -1,10 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-
-  "name": "legend-server",
-
+  "name": "legend-serverai",
   "main": "worker/src/index.js",
-
   "compatibility_date": "2026-08-17",
 
   "assets": {

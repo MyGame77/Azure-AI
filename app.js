@@ -1,4 +1,4 @@
-const API="https://legend-server.mygame77123.workers.dev";
+const API="https://azure-ai.mygame77123.workers.dev";
 const STORAGE="eternal_crimson_chats_v1";
 
 const chat=document.getElementById("chat");
