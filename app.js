@@ -146,33 +146,44 @@ async function streamChat(messages,bubble){
   const decoder=new TextDecoder();
   let buffer="", full="";
 
-  function handleEvent(raw){
-    const lines=raw.split(/\r?\n/);
-    const dataLines=lines
-      .filter(line=>line.startsWith("data:"))
-      .map(line=>line.slice(5).trimStart());
 
-    if(!dataLines.length)return;
+function handleEvent(raw){
+  const lines=raw.split(/\r?\n/);
+  const dataLines=lines
+    .filter(line=>line.startsWith("data:"))
+    .map(line=>line.slice(5).trimStart());
 
-    const data=dataLines.join("\n").trim();
-    if(!data || data==="[DONE]")return;
+  if(!dataLines.length)return;
 
-    try{
-      const obj=JSON.parse(data);
-      let piece="";
+  const data=dataLines.join("\n").trim();
+  if(!data || data==="[DONE]")return;
 
-      if(typeof obj==="string") piece=obj;
-      else piece=obj.response ?? obj.result?.response ?? obj.text ?? obj.choices?.[0]?.delta?.content ?? "";
+  try{
+    const obj=JSON.parse(data);
+    let piece="";
 
-      if(piece){
-        full+=piece;
-        bubble.innerHTML=renderMarkdown(full);
-        chat.scrollTop=chat.scrollHeight;
-      }
-    }catch{
-      // Ignore incomplete/non-JSON SSE events.
+    if(typeof obj==="string"){
+      piece=obj;
+    }else if(typeof obj.choices?.[0]?.delta?.content==="string"){
+      piece=obj.choices[0].delta.content;
+    }else if(typeof obj.response==="string"){
+      piece=obj.response;
+    }else if(typeof obj.result?.response==="string"){
+      piece=obj.result.response;
+    }else if(typeof obj.text==="string"){
+      piece=obj.text;
     }
+
+    if(piece.length>0){
+      full+=piece;
+      bubble.innerHTML=renderMarkdown(full);
+      chat.scrollTop=chat.scrollHeight;
+    }
+  }catch{
+    // Ignore incomplete/non-JSON SSE events.
   }
+}
+
 
   while(true){
     const {value,done}=await reader.read();
